@@ -8,9 +8,16 @@ This is not intended for large scale projects as it has extra database interacti
 
 Simple ORM is a few years old but it has been upgraded over time, therefore **PHP 5.3** is a requirement.
 
+Origin
+------
+
+This project is a fork from [SimpleOrm by noetix](https://github.com/noetix/Simple-ORM). Go check his work if you're interested.
+
+
 Table of Contents
 -----------------
 - [Simple ORM](#simple-orm)
+  - [Origin](#origin)
   - [Table of Contents](#table-of-contents)
   - [Configuration](#configuration)
   - [Object/Table Definition](#objecttable-definition)
