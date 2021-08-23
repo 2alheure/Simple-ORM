@@ -8,6 +8,35 @@ This is not intended for large scale projects as it has extra database interacti
 
 Simple ORM is a few years old but it has been upgraded over time, therefore **PHP 5.3** is a requirement.
 
+Table of Contents
+-----------------
+- [Simple ORM](#simple-orm)
+  - [Table of Contents](#table-of-contents)
+  - [Configuration](#configuration)
+  - [Object/Table Definition](#objecttable-definition)
+  - [Basic Usage](#basic-usage)
+- [Class Configuration](#class-configuration)
+  - [A Basic Object](#a-basic-object)
+  - [Class Naming](#class-naming)
+  - [Customisation](#customisation)
+- [Data Manipulation](#data-manipulation)
+  - [Creating/Inserting New Records](#creatinginserting-new-records)
+  - [Updating](#updating)
+  - [Deleting](#deleting)
+- [Data Retrieval](#data-retrieval)
+  - [Using the Primary Key](#using-the-primary-key)
+  - [Using a Column Name](#using-a-column-name)
+  - [Select All](#select-all)
+  - [Fetch Constants](#fetch-constants)
+  - [Fetch options](#fetch-options)
+  - [Populating from an Array (Hydration)](#populating-from-an-array-hydration)
+  - [SQL Statements](#sql-statements)
+  - [SQL Tokens](#sql-tokens)
+  - [Extra Data & Aggregate Functions](#extra-data--aggregate-functions)
+- [Filters](#filters)
+  - [Input Filters](#input-filters)
+  - [Output Filters](#output-filters)
+
 
 Configuration
 --------------
@@ -164,7 +193,7 @@ or
 
 Using a Column Name
 --------------------
-    $foo = Foo::retrieveByField('bar', SimpleOrm::FETCH_ONE);
+    $foo = Foo::retrieveByField('bar', 'value', SimpleOrm::FETCH_ONE);
 
 By default, the retrieveBy* method will return an array of objects (SimpleOrm::FETCH_MANY).
 
@@ -180,6 +209,28 @@ Fetch Constants
 
 `SimpleOrm::FETCH_MANY` will always return an array of hydrated objects.
 
+
+Fetch options
+-------------
+You can use the provided `options(order_by, order, limit, offset)` method to specify your will with several parameters.
+
+| Parameter name | Parameter type | Default value        | Usage                                                                                                                     |
+| -------------- | -------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Order by       | string         | null                 | The column name to order the results by                                                                                   |
+| Order          | string         | SimpleOrm::ORDER_ASC | Whether to order the results with an ascending order (SimpleOrm::ORDER_ASC) or a descending order (SimpleOrm::ORDER_DESC) |
+| Limit          | int            | -1                   | The maximum number of objects to return                                                                                   |
+| Offset         | int            | 0                    | The number of objects to skip in the result set                                                                           |
+
+Example: 
+```php
+$foo = Foo::retrieveByField(
+    'bar', 
+    'value',
+    SimpleOrm::FETCH_ONE,
+    SimpleOrm::options('baz', SimpleOrm::ORDER_DESC, 10, 20)
+);
+```
+Produces ```SELECT * FROM `foo` WHERE `bar` = 'value' ORDER BY `baz` DESC LIMIT 10 OFFSET 20```
 
 Populating from an Array (Hydration)
 -------------------------------------

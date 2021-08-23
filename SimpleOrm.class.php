@@ -7,8 +7,7 @@
  * @package    SimpleOrm
  * @author     Alex Joyce <im@alex-joyce.com>
  */
-abstract class SimpleOrm
-{
+abstract class SimpleOrm {
     protected static
         $conn,
         $database,
@@ -25,7 +24,7 @@ abstract class SimpleOrm
         $parentObject,
         $ignoreKeyOnUpdate = true,
         $ignoreKeyOnInsert = true;
-        
+
     /**
      * ER Fine Tuning
      */
@@ -50,15 +49,13 @@ abstract class SimpleOrm
      * @param integer $method
      * @return void
      */
-    final public function __construct ($data = null, $method = self::LOAD_EMPTY)
-    {
+    final public function __construct($data = null, $method = self::LOAD_EMPTY) {
         // store raw data
         $this->loadData = $data;
         $this->loadMethod = $method;
 
         // load our data
-        switch ($method)
-        {
+        switch ($method) {
             case self::LOAD_BY_PK:
                 $this->loadByPK();
                 break;
@@ -89,11 +86,10 @@ abstract class SimpleOrm
      * @param string $database
      * @return void
      */
-    public static function useConnection (mysqli $conn, $database)
-    {
+    public static function useConnection(mysqli $conn, $database) {
         self::$conn = $conn;
         self::$database = $database;
-        
+
         $conn->select_db($database);
     }
 
@@ -104,8 +100,7 @@ abstract class SimpleOrm
      * @static
      * @return mysqli
      */
-    public static function getConnection ()
-    {
+    public static function getConnection() {
         return self::$conn;
     }
 
@@ -115,8 +110,7 @@ abstract class SimpleOrm
      * @access public
      * @return integer
      */
-    public function getLoadMethod ()
-    {
+    public function getLoadMethod() {
         return $this->loadMethod;
     }
 
@@ -126,8 +120,7 @@ abstract class SimpleOrm
      * @access public
      * @return array
      */
-    public function getLoadData ()
-    {
+    public function getLoadData() {
         return $this->loadData;
     }
 
@@ -137,8 +130,7 @@ abstract class SimpleOrm
      * @access private
      * @return void
      */
-    private function loadByPK ()
-    {
+    private function loadByPK() {
         // populate PK
         $this->{self::getTablePk()} = $this->loadData;
 
@@ -152,10 +144,9 @@ abstract class SimpleOrm
      * @access private
      * @return void
      */
-    private function loadByArray ()
-    {
+    private function loadByArray() {
         // set our data
-        foreach ($this->loadData AS $key => $value)
+        foreach ($this->loadData as $key => $value)
             $this->{$key} = $value;
 
         // extract columns
@@ -169,14 +160,13 @@ abstract class SimpleOrm
      * @access private
      * @return void
      */
-    private function hydrateEmpty ()
-    {
+    private function hydrateEmpty() {
         // set our data
         if (isset($this->erLoadData) && is_array($this->erLoadData))
-            foreach ($this->erLoadData AS $key => $value)
+            foreach ($this->erLoadData as $key => $value)
                 $this->{$key} = $value;
 
-        foreach ($this->getColumnNames() AS $field)
+        foreach ($this->getColumnNames() as $field)
             $this->{$field} = null;
 
         // mark object as new
@@ -190,15 +180,14 @@ abstract class SimpleOrm
      * @throws \Exception If the record is not found.
      * @return void
      */
-    private function hydrateFromDatabase ()
-    {
+    private function hydrateFromDatabase() {
         $sql = sprintf("SELECT * FROM `%s`.`%s` WHERE `%s` = '%s';", self::getDatabaseName(), self::getTableName(), self::getTablePk(), $this->id());
         $result = self::getConnection()->query($sql);
 
         if (!$result->num_rows)
             throw new \Exception(sprintf("%s record not found in database. (PK: %s)", get_called_class(), $this->id()), 2);
 
-        foreach ($result->fetch_assoc() AS $key => $value)
+        foreach ($result->fetch_assoc() as $key => $value)
             $this->{$key} = $value;
 
         $result->close();
@@ -214,10 +203,9 @@ abstract class SimpleOrm
      * @static
      * @return string
      */
-    public static function getDatabaseName ()
-    {
+    public static function getDatabaseName() {
         $className = get_called_class();
-        
+
         return $className::$database;
     }
 
@@ -228,8 +216,7 @@ abstract class SimpleOrm
      * @static
      * @return string
      */
-    public static function getTableName ()
-    {
+    public static function getTableName() {
         $className = get_called_class();
 
         // static prop config
@@ -247,21 +234,19 @@ abstract class SimpleOrm
      * @static
      * @return string
      */
-    public static function getTablePk ()
-    {
+    public static function getTablePk() {
         $className = get_called_class();
 
         return $className::$pk;
     }
-    
+
     /**
      * Return the PK for this record.
      * 
      * @access public
      * @return integer
      */
-    public function id ()
-    {
+    public function id() {
         return $this->{self::getTablePk()};
     }
 
@@ -271,8 +256,7 @@ abstract class SimpleOrm
      * @access public
      * @return boolean
      */
-    public function isNew ()
-    {
+    public function isNew() {
         return $this->isNew;
     }
 
@@ -283,8 +267,7 @@ abstract class SimpleOrm
      * @access public
      * @return void
      */
-    public function preInsert ()
-    {
+    public function preInsert() {
     }
 
     /**
@@ -294,8 +277,7 @@ abstract class SimpleOrm
      * @access public
      * @return void
      */
-    public function postInsert ()
-    {
+    public function postInsert() {
     }
 
     /**
@@ -305,8 +287,7 @@ abstract class SimpleOrm
      * @access public
      * @return void
      */
-    public function initialise ()
-    {
+    public function initialise() {
     }
 
     /**
@@ -315,11 +296,10 @@ abstract class SimpleOrm
      * @access private
      * @return void
      */
-    private function executeOutputFilters ()
-    {
+    private function executeOutputFilters() {
         $r = new \ReflectionClass(get_class($this));
-    
-        foreach ($r->getMethods() AS $method)
+
+        foreach ($r->getMethods() as $method)
             if (substr($method->name, 0, strlen(self::FILTER_OUT_PREFIX)) == self::FILTER_OUT_PREFIX)
                 $this->{$method->name}();
     }
@@ -330,11 +310,10 @@ abstract class SimpleOrm
      * @access private
      * @return void
      */
-    private function executeInputFilters ($array)
-    {
+    private function executeInputFilters($array) {
         $r = new \ReflectionClass(get_class($this));
-    
-        foreach ($r->getMethods() AS $method)
+
+        foreach ($r->getMethods() as $method)
             if (substr($method->name, 0, strlen(self::FILTER_IN_PREFIX)) == self::FILTER_IN_PREFIX)
                 $array = $this->{$method->name}($array);
 
@@ -347,8 +326,7 @@ abstract class SimpleOrm
      * @access public
      * @return void
      */
-    public function save ()
-    {
+    public function save() {
         if ($this->isNew())
             $this->insert();
         else
@@ -362,8 +340,7 @@ abstract class SimpleOrm
      * @throws \Exception
      * @return void
      */
-    private function insert ()
-    {
+    private function insert() {
         $array = $this->get();
 
         // run pre inserts
@@ -382,8 +359,7 @@ abstract class SimpleOrm
         // compile statement
         $fieldNames = $fieldMarkers = $types = $values = array();
 
-        foreach ($array AS $key => $value)
-        {
+        foreach ($array as $key => $value) {
             $fieldNames[] = sprintf('`%s`', $key);
             $fieldMarkers[] = '?';
             $types[] = $this->parseValueType($value);
@@ -392,18 +368,18 @@ abstract class SimpleOrm
 
         // build sql statement
         $sql = sprintf("INSERT INTO `%s`.`%s` (%s) VALUES (%s)", self::getDatabaseName(), self::getTableName(), implode(', ', $fieldNames), implode(', ', $fieldMarkers));
-        
+
         // prepare, bind & execute
         $stmt = self::getConnection()->prepare($sql);
 
         if (!$stmt)
-            throw new \Exception(self::getConnection()->error."\n\n".$sql);
+            throw new \Exception(self::getConnection()->error . "\n\n" . $sql);
 
         call_user_func_array(array($stmt, 'bind_param'), array_merge(array(implode($types)), $values));
         $stmt->execute();
 
         if ($stmt->error)
-            throw new \Exception($stmt->error."\n\n".$sql);
+            throw new \Exception($stmt->error . "\n\n" . $sql);
 
         // set our PK (if exists)
         if ($stmt->insert_id)
@@ -411,7 +387,7 @@ abstract class SimpleOrm
 
         // mark as old
         $this->isNew = false;
-        
+
         // hydrate
         $this->hydrateFromDatabase($stmt->insert_id);
 
@@ -426,8 +402,7 @@ abstract class SimpleOrm
      * @throws \Exception
      * @return void
      */
-    public function update ()
-    {
+    public function update() {
         if ($this->isNew())
             throw new \Exception('Unable to update object, record is new.');
 
@@ -447,8 +422,7 @@ abstract class SimpleOrm
         // compile statement
         $fields = $types = $values = array();
 
-        foreach ($array AS $key => $value)
-        {
+        foreach ($array as $key => $value) {
             $fields[] = sprintf('`%s` = ?', $key);
             $types[] = $this->parseValueType($value);
             $values[] = &$array[$key];
@@ -465,13 +439,13 @@ abstract class SimpleOrm
         $stmt = self::getConnection()->prepare($sql);
 
         if (!$stmt)
-            throw new \Exception(self::getConnection()->error."\n\n".$sql);
+            throw new \Exception(self::getConnection()->error . "\n\n" . $sql);
 
         call_user_func_array(array($stmt, 'bind_param'), array_merge(array(implode($types)), $values));
         $stmt->execute();
 
         if ($stmt->error)
-            throw new \Exception($stmt->error."\n\n".$sql);
+            throw new \Exception($stmt->error . "\n\n" . $sql);
 
         // reset modified list
         $this->modifiedFields = array();
@@ -483,11 +457,10 @@ abstract class SimpleOrm
      * @access public
      * @return void
      */
-    public function delete ()
-    {
+    public function delete() {
         if ($this->isNew())
             throw new \Exception('Unable to delete object, record is new (and therefore doesn\'t exist in the database).');
-            
+
         // build sql statement
         $sql = sprintf("DELETE FROM `%s`.`%s` WHERE `%s` = ?", self::getDatabaseName(), self::getTableName(), self::getTablePk());
 
@@ -496,13 +469,13 @@ abstract class SimpleOrm
 
         if (!$stmt)
             throw new \Exception(self::getConnection()->error);
-            
+
         $id = $this->id();
         $stmt->bind_param('i', $id);
         $stmt->execute();
 
         if ($stmt->error)
-            throw new \Exception($stmt->error."\n\n".$sql);
+            throw new \Exception($stmt->error . "\n\n" . $sql);
     }
 
     /**
@@ -511,11 +484,10 @@ abstract class SimpleOrm
      * @access public
      * @return array
      */
-    public function getColumnNames ()
-    {
+    public function getColumnNames() {
         $conn = self::getConnection();
         $result = $conn->query(sprintf("DESCRIBE %s.%s;", self::getDatabaseName(), self::getTableName()));
-        
+
         if ($result === false)
             throw new \Exception(sprintf('Unable to fetch the column names. %s.', $conn->error));
 
@@ -536,8 +508,7 @@ abstract class SimpleOrm
      * @param mixed $value
      * @return string
      */
-    private function parseValueType ($value)
-    {
+    private function parseValueType($value) {
         // ints
         if (is_int($value))
             return 'i';
@@ -559,8 +530,7 @@ abstract class SimpleOrm
      * @param object $obj
      * @return object
      */
-    public function parent ($obj = false)
-    {
+    public function parent($obj = false) {
         if ($obj && is_object($obj))
             $this->parentObject = $obj;
 
@@ -574,10 +544,8 @@ abstract class SimpleOrm
      * @param boolean $return If true the current object won't be reverted, it will return a new object via cloning.
      * @return void | clone
      */
-    public function revert ($return = false)
-    {
-        if ($return)
-        {
+    public function revert($return = false) {
+        if ($return) {
             $ret = clone $this;
             $ret->revert();
 
@@ -594,15 +562,14 @@ abstract class SimpleOrm
      * @param string $fieldName If false (default), the entire record will be returned as an array.
      * @return array | string
      */
-    public function get ($fieldName = false)
-    {
+    public function get($fieldName = false) {
         // return all data
         if ($fieldName === false)
             return self::convertObjectToArray($this);
 
         return $this->{$fieldName};
     }
-    
+
     /**
      * Convert an object to an array.
      *
@@ -611,19 +578,17 @@ abstract class SimpleOrm
      * @param object $object
      * @return array
      */
-    public static function convertObjectToArray ($object)
-    { 
+    public static function convertObjectToArray($object) {
         if (!is_object($object))
             return $object;
 
         $array = array();
         $r = new ReflectionObject($object);
 
-        foreach ($r->getProperties(ReflectionProperty::IS_PUBLIC) AS $key => $value)
-        {
+        foreach ($r->getProperties(ReflectionProperty::IS_PUBLIC) as $key => $value) {
             $key = $value->getName();
             $value = $value->getValue($object);
-        
+
             $array[$key] = is_object($value) ? self::convertObjectToArray($value) : $value;
         }
 
@@ -638,14 +603,13 @@ abstract class SimpleOrm
      * @param string $newValue
      * @return void
      */
-    public function set ($fieldName, $newValue)
-    {
+    public function set($fieldName, $newValue) {
         // if changed, mark object as modified
         if ($this->{$fieldName} != $newValue)
             $this->modifiedFields($fieldName, $newValue);
 
         $this->{$fieldName} = $newValue;
-        
+
         return $this;
     }
 
@@ -656,8 +620,7 @@ abstract class SimpleOrm
      * @access public
      * @return array | false
      */
-    public function isModified ()
-    {
+    public function isModified() {
         return (count($this->modifiedFields) > 0) ? $this->modifiedFields : false;
     }
 
@@ -669,11 +632,9 @@ abstract class SimpleOrm
      * @param string $newValue
      * @return void
      */
-    private function modifiedFields ($fieldName, $newValue)
-    {
+    private function modifiedFields($fieldName, $newValue) {
         // add modified field to a list
-        if (!isset($this->modifiedFields[$fieldName]))
-        {
+        if (!isset($this->modifiedFields[$fieldName])) {
             $this->modifiedFields[$fieldName] = $newValue;
 
             return;
@@ -687,20 +648,6 @@ abstract class SimpleOrm
         $this->modifiedFields[$fieldName][] = $newValue;
     }
 
-    /**
-     * Fetch & return one record only.
-     */
-    const FETCH_ONE = 1;
-
-    /**
-     * Fetch multiple records.
-     */
-    const FETCH_MANY = 2;
-    
-    /**
-     * Don't fetch.
-     */
-    const FETCH_NONE = 3;
 
     /**
      * Execute an SQL statement & get all records as hydrated objects.
@@ -710,17 +657,16 @@ abstract class SimpleOrm
      * @param integer $return
      * @return mixed
      */
-    public static function sql ($sql, $return = SimpleOrm::FETCH_MANY)
-    {
+    public static function sql($sql, $return = SimpleOrm::FETCH_MANY) {
         // shortcuts
         $sql = str_replace(array(':database', ':table', ':pk'), array(self::getDatabaseName(), self::getTableName(), self::getTablePk()), $sql);
-        
+
         // execute
         $result = self::getConnection()->query($sql);
-        
+
         if (!$result)
             throw new \Exception(sprintf('Unable to execute SQL statement. %s', self::getConnection()->error));
-        
+
         if ($return === SimpleOrm::FETCH_NONE)
             return;
 
@@ -737,7 +683,7 @@ abstract class SimpleOrm
 
         return $ret;
     }
-    
+
     /**
      * Execute a Count SQL statement & return the number.
      * 
@@ -746,13 +692,12 @@ abstract class SimpleOrm
      * @param integer $return
      * @return mixed
      */
-    public static function count ($sql)
-    {
+    public static function count($sql) {
         $count = self::sql($sql, SimpleOrm::FETCH_ONE);
 
         return $count > 0 ? $count : 0;
     }
-    
+
     /**
      * Truncate the table.
      * All data will be removed permanently.
@@ -761,8 +706,7 @@ abstract class SimpleOrm
      * @static
      * @return void
      */
-    public static function truncate ()
-    {
+    public static function truncate() {
         self::sql('TRUNCATE :database.:table', SimpleOrm::FETCH_NONE);
     }
 
@@ -772,9 +716,10 @@ abstract class SimpleOrm
      * @access public
      * @return array
      */
-    public static function all ()
-    {
-        return self::sql("SELECT * FROM :database.:table");
+    public static function all(array $options = []) {
+        return self::sql(
+            self::addOptionsToQuery("SELECT * FROM :database.:table", SimpleOrm::FETCH_MANY, $options)
+        );
     }
 
     /**
@@ -784,8 +729,7 @@ abstract class SimpleOrm
      * @param integer $pk
      * @return object
      */
-    public static function retrieveByPK ($pk)
-    {
+    public static function retrieveByPK($pk) {
         if (!is_numeric($pk))
             throw new \InvalidArgumentException('The PK must be an integer.');
 
@@ -802,8 +746,7 @@ abstract class SimpleOrm
      * @param array $data
      * @return object
      */
-    public static function hydrate ($data)
-    {
+    public static function hydrate($data) {
         if (!is_array($data))
             throw new \InvalidArgumentException('The data given must be an array.');
 
@@ -824,12 +767,10 @@ abstract class SimpleOrm
      * @param array $args
      * @return mixed
      */
-    public static function __callStatic ($name, $args)
-    {
+    public static function __callStatic($name, $args) {
         $class = get_called_class();
 
-        if (substr($name, 0, 10) == 'retrieveBy')
-        {
+        if (substr($name, 0, 10) == 'retrieveBy') {
             // prepend field name to args
             $field = strtolower(preg_replace('/\B([A-Z])/', '_${1}', substr($name, 10)));
             array_unshift($args, $field);
@@ -847,26 +788,56 @@ abstract class SimpleOrm
      * @static
      * @param string $field
      * @param mixed $value
-     * @param integer $return
+     * @param int $fetch Whether to fetch one or many rows
+     * @param array $options The options for the query (return by options())
+     * @see self::options()
      * @return mixed
      */
-    public static function retrieveByField ($field, $value, $return = SimpleOrm::FETCH_MANY)
-    {
+    public static function retrieveByField($field, $value, $fetch = SimpleOrm::FETCH_MANY, array $options = []) {
         if (!is_string($field))
             throw new \InvalidArgumentException('The field name must be a string.');
 
         // build our query
         $operator = (strpos($value, '%') === false) ? '=' : 'LIKE';
 
-        $sql = sprintf("SELECT * FROM :database.:table WHERE %s %s '%s'", $field, $operator, $value);
-
-        if ($return === SimpleOrm::FETCH_ONE)
-            $sql .= ' LIMIT 0,1';
+        $sql = self::addOptionsToQuery(
+            sprintf("SELECT * FROM :database.:table WHERE %s %s '%s'", $field, $operator, $value),
+            $fetch,
+            $options
+        );
 
         // fetch our records
-        return self::sql($sql, $return);
+        return self::sql($sql, $fetch);
     }
-    
+
+    /**
+     * Adds some options to a SQL record
+     * based on the value of the provided options
+     * 
+     * @access private
+     * @static
+     * @param string $sql
+     * @param int $fetch
+     * @param array $options The options for the query (return by options())
+     * @see self::options()
+     * @return string
+     */
+    private static function addOptionsToQuery(string $sql, $fetch = SimpleOrm::FETCH_MANY, array $options = []) {
+        if ($fetch === SimpleOrm::FETCH_ONE) {
+            $sql .= ' LIMIT 1 OFFSET 0';
+        } else {
+            if (!empty($options['order_by'])) {
+                $sql .= " ORDER BY {$options['order_by']} {$options['order']}";
+            }
+
+            if (!empty($options['limit'])) {
+                $sql .= " LIMIT {$options['limit']} OFFSET {$options['offset']}";
+            }
+        }
+
+        return $sql;
+    }
+
     /**
      * Get array for select box.
      *
@@ -876,19 +847,77 @@ abstract class SimpleOrm
      * @param string $where
      * @return array
      */
-    public static function buildSelectBoxValues ($where = null)
-    {
+    public static function buildSelectBoxValues($where = null) {
         $sql = 'SELECT * FROM :database.:table';
-        
+
         // custom where?
         if (is_string($where))
             $sql .= sprintf(" WHERE %s", $where);
-    
+
         $values = array();
-        
-        foreach (self::sql($sql) AS $object)
+
+        foreach (self::sql($sql) as $object)
             $values[$object->id()] = (string) $object;
-    
+
         return $values;
+    }
+
+    /**
+     * Fetch & return one record only.
+     */
+    const FETCH_ONE = 1;
+
+    /**
+     * Fetch multiple records.
+     */
+    const FETCH_MANY = 2;
+
+    /**
+     * Don't fetch.
+     */
+    const FETCH_NONE = 3;
+
+    /**
+     * Ascending order
+     */
+    const ORDER_ASC = 'ASC';
+
+    /**
+     * Descending order
+     */
+    const ORDER_DESC = 'DESC';
+
+    /**
+     * Build option array in order to use in query
+     * 
+     * @access public
+     * @static
+     * 
+     * @param string $order_by The column name to order the results by
+     * @param string $order 'ASC' or 'DESC', the ordering to apply on the selected column
+     * @param int $limit The maximum number of rows to return
+     * @param int $offset The number of rows to skip from results
+     * 
+     * @return array The options array
+     */
+    public static function options(string $order_by = null, string $order = SimpleOrm::ORDER_ASC, int $limit = -1, int $offset = 0) {
+        $options = [];
+        
+        if ($order_by !== null) {
+            $options['order_by'] = $order_by;
+
+            if ($order === SimpleOrm::ORDER_ASC || $order === SimpleOrm::ORDER_DESC) {
+                $options['order'] = $order;
+            } else {
+                $options['order'] = SimpleOrm::ORDER_ASC;
+            }
+        }
+
+        if ($limit > 0) {
+            $options['limit'] = $limit;
+            $options['offset'] = $offset;
+        }
+
+        return $options;
     }
 }

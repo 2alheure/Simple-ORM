@@ -16,7 +16,8 @@ if ($conn->connect_error)
 SimpleOrm::useConnection($conn, $params['database']['name']);
 
 // Define an object that relates to a table.
-class Blog extends SimpleOrm { }
+class Blog extends SimpleOrm {
+}
 
 // Create an entry.
 $entry = new Blog;
@@ -42,6 +43,14 @@ $entry->save();
 
 // Delete the record from the table.
 $entry->delete();
+
+
+// 10 last articles
+var_dump(
+  Blog::all(
+    SimpleOrm::options('date', SimpleOrm::ORDER_DESC, 10)
+  )
+);
 
 /*
 
